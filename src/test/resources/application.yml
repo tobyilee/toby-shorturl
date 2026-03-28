@@ -21,6 +21,6 @@ spring:
             client-id: test-github-id
             client-secret: test-github-secret
 
-linkly:
+tobyshorturl:
   ip-hash-secret: test-secret
   short-code-length: 6

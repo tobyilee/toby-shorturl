@@ -1,6 +1,6 @@
 spring:
   application:
-    name: linkly
+    name: tobyshorturl
   datasource:
     url: jdbc:postgresql://localhost:5432/linkly
     username: linkly
@@ -24,7 +24,7 @@ spring:
             client-secret: ${GITHUB_CLIENT_SECRET:placeholder}
             scope: user:email
 
-linkly:
+tobyshorturl:
   ip-hash-secret: ${IP_HASH_SECRET:default-dev-secret-change-in-prod}
   short-code-length: 6
 

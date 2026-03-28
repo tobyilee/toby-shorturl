@@ -1,1 +1,1 @@
-rootProject.name = "linkly"
+rootProject.name = "tobyshorturl"
