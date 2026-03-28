@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: linkly
+  datasource:
+    url: jdbc:postgresql://localhost:5432/linkly
+    username: linkly
+    password: linkly
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:placeholder}
+            client-secret: ${GOOGLE_CLIENT_SECRET:placeholder}
+            scope: openid,profile,email
+          github:
+            client-id: ${GITHUB_CLIENT_ID:placeholder}
+            client-secret: ${GITHUB_CLIENT_SECRET:placeholder}
+            scope: user:email
+
+linkly:
+  ip-hash-secret: ${IP_HASH_SECRET:default-dev-secret-change-in-prod}
+  short-code-length: 6
+
+server:
+  port: 8080
