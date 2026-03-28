@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linkly - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+        nav { background: white; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        nav h1 { font-size: 24px; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-right span { color: #666; }
+        .logout-btn { background: none; border: 1px solid #ddd; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .container { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+        .btn-create { display: inline-block; background: #4285F4; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 24px; }
+        .btn-create:hover { background: #3367D6; }
+        table { width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-collapse: collapse; }
+        th { background: #fafafa; text-align: left; padding: 12px 16px; font-weight: 600; color: #555; border-bottom: 2px solid #eee; }
+        td { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; }
+        td a { color: #4285F4; text-decoration: none; }
+        td a:hover { text-decoration: underline; }
+        .empty { text-align: center; padding: 48px; color: #999; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>Linkly</h1>
+        <div class="nav-right">
+            <span th:text="${userName}">User</span>
+            <form th:action="@{/app/logout}" method="post" style="display:inline;">
+                <button class="logout-btn" type="submit">Logout</button>
+            </form>
+        </div>
+    </nav>
+    <div class="container">
+        <a class="btn-create" th:href="@{/app/links/new}">+ Create New Link</a>
+        <table th:if="${links.totalElements > 0}">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Short Code</th>
+                    <th>Clicks</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="link : ${links.content}">
+                    <td><a th:href="@{/app/links/{id}(id=${link.id})}" th:text="${link.title ?: link.shortCode}">Title</a></td>
+                    <td th:text="${link.shortCode}">abc123</td>
+                    <td th:text="${link.clickCount}">0</td>
+                    <td th:text="${link.createdAt}">2024-01-01</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="empty" th:if="${links.totalElements == 0}">
+            <p>No links yet. Create your first short link!</p>
+        </div>
+    </div>
+</body>
+</html>
