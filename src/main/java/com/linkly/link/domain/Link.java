@@ -46,6 +46,14 @@ public class Link {
     protected Link() {
     }
 
+    public Link(String shortCode, String originalUrl, String title, Long userId, Instant expiresAt) {
+        this.shortCode = shortCode;
+        this.originalUrl = originalUrl;
+        this.title = title;
+        this.userId = userId;
+        this.expiresAt = expiresAt;
+    }
+
     @PrePersist
     void prePersist() {
         Instant now = Instant.now();
