@@ -28,7 +28,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String provider = userRequest.getClientRegistration().getRegistrationId();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        String providerId = String.valueOf(attributes.get("id"));
+        String providerId;
+        if ("google".equals(provider)) {
+            providerId = String.valueOf(attributes.get("sub"));
+        } else {
+            providerId = String.valueOf(attributes.get("id"));
+        }
         String email = (String) attributes.get("email");
         String rawName = (String) attributes.get("name");
         if (rawName == null && "github".equals(provider)) {
