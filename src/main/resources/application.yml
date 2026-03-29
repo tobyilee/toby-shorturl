@@ -2,9 +2,9 @@ spring:
   application:
     name: tobyshorturl
   datasource:
-    url: jdbc:postgresql://localhost:5432/linkly
-    username: linkly
-    password: linkly
+    url: jdbc:postgresql://localhost:5432/tobyshorturl
+    username: tobyshorturl
+    password: tobyshorturl
   jpa:
     hibernate:
       ddl-auto: validate
