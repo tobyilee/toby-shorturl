@@ -22,6 +22,11 @@
         .qr-section img { border: 1px solid #eee; border-radius: 8px; }
         .back-link { display: inline-block; color: #4285F4; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
+        .copy-row { display: flex; align-items: center; gap: 8px; }
+        .copy-btn { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; gap: 4px; color: #666; }
+        .copy-btn:hover { background: #f0f0f0; }
+        .copy-btn svg { width: 18px; height: 18px; }
+        .copied-text { font-size: 13px; color: #34a853; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -33,8 +38,19 @@
                 <div class="field-value"><a th:href="${link.originalUrl}" th:text="${link.originalUrl}" target="_blank">https://example.com</a></div>
             </div>
             <div class="field">
-                <div class="field-label">Short Code</div>
-                <div class="field-value" th:text="${link.shortCode}">abc123</div>
+                <div class="field-label">Short URL</div>
+                <div class="field-value">
+                    <div class="copy-row">
+                        <a th:href="${shortUrl}" th:text="${shortUrl}" target="_blank">http://localhost:8080/abc123</a>
+                        <button class="copy-btn" id="copyBtn" th:data-url="${shortUrl}" onclick="copyShortUrl(this)">
+                            <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <span class="copied-text" id="copiedText" style="display:none;">Copied!</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="field">
                 <div class="stat-box">
@@ -48,5 +64,22 @@
         </div>
         <a class="back-link" th:href="@{/app/dashboard}">&larr; Back to Dashboard</a>
     </div>
+    <script>
+    function copyShortUrl(btn) {
+        var url = btn.getAttribute('data-url');
+        navigator.clipboard.writeText(url).then(function() {
+            var icon = btn.querySelector('#copyIcon');
+            var text = btn.querySelector('#copiedText');
+            icon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+            icon.style.color = '#34a853';
+            text.style.display = 'inline';
+            setTimeout(function() {
+                icon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+                icon.style.color = '';
+                text.style.display = 'none';
+            }, 2000);
+        });
+    }
+    </script>
 </body>
 </html>

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Controller
 @RequestMapping("/app")
@@ -61,7 +62,9 @@ public class DashboardViewController {
         Long userId = resolveUserId(principal);
         Link link = linkService.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         model.addAttribute("link", link);
+        model.addAttribute("shortUrl", baseUrl + "/" + link.getShortCode());
         return "link-detail";
     }
 
