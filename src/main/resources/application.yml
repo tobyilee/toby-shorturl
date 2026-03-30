@@ -29,4 +29,4 @@ tobyshorturl:
   short-code-length: 6
 
 server:
-  port: 8080
+  port: 8090
