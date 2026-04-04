@@ -1,0 +1,68 @@
+## Codebase Patterns
+- Spring Boot 4.0.4, Java 25, Gradle Kotlin DSL (build.gradle.kts)
+- Thymeleaf 템플릿: src/main/resources/templates/
+- 기존 인증 페이지: dashboard.html, link-create.html, link-detail.html
+- 랜딩/로그인 페이지: home.html, login.html (사이드바 적용 대상 아님)
+- AnalyticsService.getStatsV1() — StatsV1(totalClicks, uniqueClicks, clicksByDate) 반환
+- DashboardViewController에서 링크 소유권 검증 패턴: linkService.findByIdAndUserId(id, userId)
+- resolveUserId() 패턴이 4개 컨트롤러에 중복 존재
+- 기존 색상 체계: #4285F4 파란색 프라이머리
+
+- DashboardViewController에 AnalyticsService 주입됨 (US-001에서 추가)
+- stats 엔드포인트: preset 파라미터(today/7d/30d/all)를 from/to LocalDate로 변환
+- stats.html 템플릿: stats.totalClicks(), stats.uniqueClicks(), stats.clicksByDate() 사용
+
+---
+
+## 2026-04-04 11:57 - US-004 + US-005
+- stats.html 전체 재작성: 사이드바, 통계 카드 2개, Chart.js 라인 차트, 프리셋 필터 버튼
+- Chart.js CDN 로드, th:inline="javascript"로 clicksByDate 데이터 JSON 주입
+- preset-bar에 Today/7D/30D/All Time 4개 버튼, 활성 프리셋 파란색 강조
+- 데이터 없을 시 "No click data for the selected period." 빈 상태 표시
+- 파일 변경: stats.html (수정)
+- **Learnings for future iterations:**
+  - Thymeleaf의 th:inline="javascript"에서 record 객체를 직접 주입하면 JSON으로 자동 직렬화됨
+  - Chart.js tension: 0.3으로 부드러운 곡선, fill: true로 영역 채우기
+  - /*[[${...}]]*/ 구문으로 서버 데이터를 JavaScript 변수에 안전하게 주입
+---
+
+## 2026-04-04 11:58 - US-006
+- link-detail.html에 "View Stats" 버튼 추가 (/app/links/{id}/stats로 이동)
+- 기존 "Back to Dashboard" 링크와 나란히 배치 (flex row)
+- 파일 변경: link-detail.html (수정)
+---
+
+## 2026-04-04 11:56 - US-003
+- link-create.html, link-detail.html에 사이드바 프래그먼트 적용
+- DashboardViewController의 createForm()에 userName 모델 속성 추가 (사이드바에 사용자명 표시 필요)
+- DashboardViewController의 linkDetail()에 userName 모델 속성 추가
+- 파일 변경: link-create.html, link-detail.html (수정), DashboardViewController.java (수정)
+- **Learnings for future iterations:**
+  - 사이드바 프래그먼트가 userName 모델 속성에 의존하므로 모든 컨트롤러 메서드에서 userName을 모델에 추가해야 함
+  - link-create는 activePage='links', link-detail도 activePage='links'로 설정
+---
+
+## 2026-04-04 11:55 - US-002
+- fragments/sidebar.html 생성 (sidebar + sidebarStyles 두 프래그먼트)
+- 사이드바: 로고, Dashboard/My Links/Settings(비���성) 네비게이션, 사용자명+로그아웃
+- activePage 파라미터로 현재 페이지 강조 (active 클래스)
+- dashboard.html에서 상단 nav 제거, sidebar-content wrapper로 감싸 메인 컨텐츠 우측 이동
+- 768px 미만 반응형 숨김 처리
+- 파일 변경: fragments/sidebar.html (신규), dashboard.html (수정)
+- **Learnings for future iterations:**
+  - th:replace="~{fragments/sidebar :: sidebar('dashboard')}" 형태로 프래그먼트 파라미터 전달
+  - sidebarStyles 프래그먼트를 별도로 분리하여 head에서 th:replace로 삽입
+  - sidebar-content 클래스에 margin-left: 240px 적용하여 컨텐츠 영역 이동
+  - userName 모델 속성이 각 컨트롤러에서 전달되어야 사이드바에 사용자명 표시 가능
+---
+
+## 2026-04-04 11:52 - US-001
+- DashboardViewController에 GET /app/links/{id}/stats 엔드포인트 추가
+- AnalyticsService 주입, preset 파라미터 → from/to 날짜 변환 로직 구현
+- stats.html 기본 템플릿 생성 (통계 카드 2개 + 데이터 출력)
+- 파일 변경: DashboardViewController.java, stats.html (신규)
+- **Learnings for future iterations:**
+  - DashboardViewController 생성자에 AnalyticsService 추가했으므로 기존 테스트가 생성자 시그니처에 의존하면 깨질 수 있음 (현재 테스트 없어서 통과)
+  - Link.getCreatedAt()은 Instant 타입이므로 LocalDate 변환 시 ZoneOffset.UTC 사용
+  - stats.html에서 record 메서드 접근은 stats.totalClicks() 형태로 (Thymeleaf에서 자동 지원)
+---
