@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="sidebar(activePage)" class="sidebar">
+    <div class="sidebar-header">
+        <a href="/app/dashboard" class="sidebar-logo">TobyShortUrl</a>
+    </div>
+    <nav class="sidebar-nav">
+        <a th:href="@{/app/dashboard}" class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+        </a>
+        <a th:href="@{/app/dashboard}" class="nav-item" th:classappend="${activePage == 'links'} ? 'active' : ''">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            My Links
+        </a>
+        <a class="nav-item disabled">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Settings
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user" th:text="${userName}">User</div>
+        <form th:action="@{/app/logout}" method="post" style="display:inline; width:100%;">
+            <button class="sidebar-logout" type="submit">Logout</button>
+        </form>
+    </div>
+</div>
+
+<style th:fragment="sidebarStyles">
+    .sidebar {
+        position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+        background: white; border-right: 1px solid #e5e7eb;
+        display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header {
+        padding: 24px 20px 20px; border-bottom: 1px solid #f0f0f0;
+    }
+    .sidebar-logo {
+        font-size: 20px; font-weight: 700; color: #111; text-decoration: none;
+    }
+    .sidebar-nav {
+        flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 2px;
+    }
+    .nav-item {
+        display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+        border-radius: 8px; color: #555; text-decoration: none; font-size: 15px;
+        font-weight: 500; transition: background 0.15s, color 0.15s;
+    }
+    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-item:hover { background: #f5f5f5; color: #111; }
+    .nav-item.active { background: #e8f0fe; color: #4285F4; font-weight: 600; }
+    .nav-item.active svg { stroke: #4285F4; }
+    .nav-item.disabled { color: #bbb; cursor: default; pointer-events: none; }
+    .sidebar-footer {
+        padding: 16px 20px; border-top: 1px solid #f0f0f0;
+        display: flex; flex-direction: column; gap: 8px;
+    }
+    .sidebar-user { font-size: 14px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sidebar-logout {
+        width: 100%; background: none; border: 1px solid #ddd; padding: 6px 16px;
+        border-radius: 6px; cursor: pointer; font-size: 13px; color: #666;
+        transition: background 0.15s;
+    }
+    .sidebar-logout:hover { background: #f5f5f5; }
+    .sidebar-content { margin-left: 240px; }
+    @media (max-width: 768px) {
+        .sidebar { display: none; }
+        .sidebar-content { margin-left: 0; }
+    }
+</style>
+</body>
+</html>
