@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TobyShortUrl - Create Link</title>
+    <style th:replace="~{fragments/sidebar :: sidebarStyles}"></style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
@@ -20,18 +21,21 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Create New Link</h2>
-        <div class="card">
-            <form th:action="@{/app/links}" method="post">
-                <label for="url">URL</label>
-                <input type="url" id="url" name="url" placeholder="https://example.com" required>
-                <label for="title">Title (optional)</label>
-                <input type="text" id="title" name="title" placeholder="My Link">
-                <button class="btn-submit" type="submit">Create Link</button>
-            </form>
+    <div th:replace="~{fragments/sidebar :: sidebar('links')}"></div>
+    <div class="sidebar-content">
+        <div class="container">
+            <h2>Create New Link</h2>
+            <div class="card">
+                <form th:action="@{/app/links}" method="post">
+                    <label for="url">URL</label>
+                    <input type="url" id="url" name="url" placeholder="https://example.com" required>
+                    <label for="title">Title (optional)</label>
+                    <input type="text" id="title" name="title" placeholder="My Link">
+                    <button class="btn-submit" type="submit">Create Link</button>
+                </form>
+            </div>
+            <a class="back-link" th:href="@{/app/dashboard}">&larr; Back to Dashboard</a>
         </div>
-        <a class="back-link" th:href="@{/app/dashboard}">&larr; Back to Dashboard</a>
     </div>
 </body>
 </html>

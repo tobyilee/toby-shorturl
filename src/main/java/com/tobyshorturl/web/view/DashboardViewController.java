@@ -50,7 +50,8 @@ public class DashboardViewController {
     }
 
     @GetMapping("/links/new")
-    public String createForm() {
+    public String createForm(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        model.addAttribute("userName", principal.getAttribute("name"));
         return "link-create";
     }
 
@@ -73,6 +74,7 @@ public class DashboardViewController {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         model.addAttribute("link", link);
         model.addAttribute("shortUrl", baseUrl + "/" + link.getShortCode());
+        model.addAttribute("userName", principal.getAttribute("name"));
         return "link-detail";
     }
 
