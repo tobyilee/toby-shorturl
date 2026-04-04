@@ -1,0 +1,119 @@
+{
+  "project": "TobyShortUrl",
+  "branchName": "ralph/spring-boot4-java25-upgrade",
+  "description": "Upgrade Spring Boot 3.5.0 to 4.0.4 and Java 17 to 25 with full migration",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Upgrade Gradle wrapper to support Java 25",
+      "description": "As a developer, I need Gradle updated to a version that supports Java 25 so the project builds correctly.",
+      "acceptanceCriteria": [
+        "Update gradle/wrapper/gradle-wrapper.properties to latest Gradle version supporting Java 25",
+        "./gradlew --version runs without errors",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Upgraded from 8.14.4 to 9.4.1 (latest stable, March 2026)."
+    },
+    {
+      "id": "US-002",
+      "title": "Upgrade Spring Boot to 4.0.4, Java to 25, and rename starters",
+      "description": "As a developer, I need build.gradle.kts updated with Boot 4.0.4, Java 25 toolchain, and the new modularized starter names.",
+      "acceptanceCriteria": [
+        "Spring Boot plugin version changed from 3.5.0 to 4.0.4",
+        "io.spring.dependency-management plugin updated to compatible version",
+        "Java languageVersion changed from 17 to 25",
+        "spring-boot-starter-web renamed to spring-boot-starter-webmvc",
+        "spring-boot-starter-oauth2-client renamed to spring-boot-starter-security-oauth2-client",
+        "flyway-core and flyway-database-postgresql replaced with spring-boot-starter-flyway",
+        "thymeleaf-extras-springsecurity6 replaced with Boot 4 compatible equivalent",
+        "spring-boot-starter-security-test added for test scope",
+        "All dependencies resolve without errors",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "All starters renamed, dependencies resolve, main code compiles. Test compilation needs package fix (US-006)."
+    },
+    {
+      "id": "US-003",
+      "title": "Update third-party dependency versions",
+      "description": "As a developer, I need third-party libraries updated to versions compatible with Boot 4 and Java 25.",
+      "acceptanceCriteria": [
+        "bucket4j-core updated to Jakarta EE 11 / Servlet 6.1 compatible version",
+        "caffeine updated to compatible version",
+        "zxing (core + javase) updated if needed for Java 25",
+        "uap-java updated if needed",
+        "H2 test dependency updated if needed",
+        "All dependencies resolve without errors",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "caffeine 3.1.8→3.2.0. Others already at latest."
+    },
+    {
+      "id": "US-004",
+      "title": "Fix SecurityConfig and RateLimitConfig for Spring Security 7 and Servlet 6.1",
+      "description": "As a developer, I need SecurityConfig.java and RateLimitConfig.java updated for Spring Security 7 and Servlet 6.1 API changes.",
+      "acceptanceCriteria": [
+        "SecurityConfig.java compiles with Spring Security 7",
+        "OAuth2 login configuration (Google + GitHub) remains functional",
+        "CSRF with CookieCsrfTokenRepository still applied",
+        "Authorization rules (permitAll, authenticated) still enforced",
+        "RateLimitConfig.java compiles with Servlet 6.1 (Tomcat 11+)",
+        "Rate limiting still applies to /api/* endpoints",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "No changes needed — both configs already compatible with Security 7 and Servlet 6.1."
+    },
+    {
+      "id": "US-005",
+      "title": "Fix Jackson 3.x compatibility",
+      "description": "As a developer, I need JSON serialization working with Jackson 3.x default in Boot 4.",
+      "acceptanceCriteria": [
+        "No com.fasterxml.jackson imports remain in source code, or Jackson 2 compat module added",
+        "All API endpoints correctly serialize/deserialize JSON request/response",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "No Jackson imports in source code. Boot 4.0.4 ships Jackson 2.21.x — no migration needed."
+    },
+    {
+      "id": "US-006",
+      "title": "Update test annotations and application.yml for Boot 4",
+      "description": "As a developer, I need test code and config updated to Boot 4 conventions.",
+      "acceptanceCriteria": [
+        "@SpringBootTest tests using MockMvc have explicit @AutoConfigureMockMvc added",
+        "@MockBean replaced with @MockitoBean if used",
+        "@SpyBean replaced with @MockitoSpyBean if used",
+        "Check and update any renamed properties in application.yml (e.g., spring.jackson.* to spring.jackson.json.*)",
+        "Both main and test application.yml files updated if needed",
+        "All 9 test classes compile",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "AutoConfigureMockMvc import updated, database-platform removed, no MockBean/SpyBean to migrate."
+    },
+    {
+      "id": "US-007",
+      "title": "Final verification — build and all tests pass",
+      "description": "As a developer, I need to confirm the entire upgrade is complete with no regressions.",
+      "acceptanceCriteria": [
+        "./gradlew clean build succeeds with 0 test failures",
+        "All 9 test classes pass",
+        "JaCoCo coverage report generates successfully",
+        "No Spring Boot 4 deprecation warnings in build output",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Full clean build passes. All 9 test classes pass. JaCoCo report generated."
+    }
+  ]
+}

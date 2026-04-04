@@ -1,0 +1,75 @@
+## Codebase Patterns
+- Project uses Gradle Kotlin DSL (build.gradle.kts)
+- Java toolchain configured via `java { toolchain { languageVersion = JavaLanguageVersion.of(X) } }`
+- Spring Boot plugin and dependency management configured in plugins block
+
+---
+
+## 2026-03-28 19:46 - US-001
+- Upgraded Gradle wrapper from 8.14.4 to 9.4.1 (latest stable)
+- Files changed: gradle/wrapper/gradle-wrapper.properties, gradle/wrapper/gradle-wrapper.jar, gradlew, gradlew.bat
+- **Learnings for future iterations:**
+  - Gradle 9.4.1 uses Kotlin 2.3.0 and Groovy 4.0.29 — build.gradle.kts syntax should be compatible
+  - Use `./gradlew wrapper --gradle-version=X.Y.Z` to upgrade the wrapper
+  - Java 21 is installed locally; Java 25 will be downloaded via toolchain auto-provisioning
+---
+
+## 2026-03-28 19:50 - US-002
+- Upgraded Spring Boot 3.5.0 → 4.0.4, Java 17 → 25
+- Renamed starters: web→webmvc, oauth2-client→security-oauth2-client, flyway standalone→starter
+- Added webmvc-test and security-test starters
+- Files changed: build.gradle.kts
+- **Learnings for future iterations:**
+  - `io.spring.dependency-management:1.1.7` is compatible with Boot 4.0.4
+  - `thymeleaf-extras-springsecurity6` remains compatible with Security 7 (no springsecurity7 artifact)
+  - Boot 4 modularized test packages: `org.springframework.boot.test.autoconfigure.web.servlet` → `org.springframework.boot.webmvc.test.autoconfigure`
+  - Boot 4.0.4 still ships Jackson 2.21.x (com.fasterxml.jackson), not Jackson 3
+  - Flyway now requires `spring-boot-starter-flyway` instead of standalone flyway-core
+---
+
+## 2026-03-28 19:52 - US-003
+- Updated caffeine 3.1.8 → 3.2.0
+- bucket4j-core 8.10.1, zxing 3.5.3, uap-java 1.6.1 already at latest
+- Files changed: build.gradle.kts
+- **Learnings for future iterations:**
+  - bucket4j-core is a pure algorithm library with no servlet dependency — works with any Servlet version
+  - H2 version is managed by Spring Boot BOM — no manual update needed
+---
+
+## 2026-03-28 19:53 - US-004
+- Verified SecurityConfig.java and RateLimitConfig.java compile with Boot 4 / Security 7 / Servlet 6.1
+- No code changes needed — both already compatible
+- **Learnings for future iterations:**
+  - Lambda-based HttpSecurity DSL (Boot 3.x style) is fully compatible with Security 7
+  - jakarta.servlet.Filter interface unchanged in Servlet 6.1
+  - No deprecation warnings from either config class
+---
+
+## 2026-03-28 19:53 - US-005
+- No com.fasterxml.jackson imports in source code — no changes needed
+- Boot 4.0.4 still ships Jackson 2.21.x, not Jackson 3
+- **Learnings for future iterations:**
+  - Jackson 3 migration is NOT required for Boot 4.0.x — Jackson 2 is still the default
+---
+
+## 2026-03-28 19:55 - US-004/US-005/US-006
+- US-004: SecurityConfig and RateLimitConfig already compatible — no changes
+- US-005: No Jackson imports in codebase — no changes
+- US-006: Fixed AutoConfigureMockMvc import in 2 test files, removed deprecated database-platform from test yml
+- Files changed: LinkApiControllerTest.java, RedirectControllerTest.java, src/test/resources/application.yml
+- **Learnings for future iterations:**
+  - Boot 4 moves AutoConfigureMockMvc to org.springframework.boot.webmvc.test.autoconfigure
+  - Hibernate 7 auto-detects H2 dialect — no need for database-platform property
+  - No @MockBean/@SpyBean in this project — no migration needed for those annotations
+---
+
+## 2026-03-28 19:56 - US-007
+- ./gradlew clean build — BUILD SUCCESSFUL in 9s
+- All 9 test classes pass with 0 failures
+- JaCoCo coverage report generated at build/reports/jacoco/test/html/index.html
+- No deprecation warnings in build output
+- **Learnings for future iterations:**
+  - Boot 4.0.4 migration from 3.5.0 is relatively smooth for projects already on jakarta.* namespace
+  - Main breaking changes: starter renames and test package modularization
+  - Hibernate 7.x JPA works transparently with existing entity annotations
+---
