@@ -4,40 +4,125 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TobyShortUrl - Statistics</title>
+    <style th:replace="~{fragments/sidebar :: sidebarStyles}"></style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-        .container { max-width: 800px; margin: 48px auto; padding: 0 16px; }
-        h2 { margin-bottom: 8px; color: #111; }
+        .container { max-width: 800px; margin: 32px auto; padding: 0 16px; }
+        h2 { margin-bottom: 4px; color: #111; }
         .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+        .subtitle a { color: #4285F4; text-decoration: none; }
+        .subtitle a:hover { text-decoration: underline; }
+        .preset-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+        .preset-btn {
+            padding: 8px 18px; border-radius: 20px; border: 1px solid #ddd;
+            background: white; color: #555; font-size: 14px; font-weight: 500;
+            text-decoration: none; transition: all 0.15s;
+        }
+        .preset-btn:hover { border-color: #4285F4; color: #4285F4; }
+        .preset-btn.active { background: #4285F4; color: white; border-color: #4285F4; }
         .stat-cards { display: flex; gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex: 1; text-align: center; }
+        .stat-card {
+            background: white; padding: 24px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex: 1; text-align: center;
+        }
         .stat-number { font-size: 36px; font-weight: 700; color: #4285F4; }
         .stat-label { font-size: 14px; color: #666; margin-top: 4px; }
-        .back-link { display: inline-block; color: #4285F4; text-decoration: none; margin-top: 24px; }
+        .chart-card {
+            background: white; padding: 24px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px;
+        }
+        .chart-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; }
+        .empty-chart { text-align: center; padding: 48px; color: #999; }
+        .back-link { display: inline-block; color: #4285F4; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2 th:text="${link.title ?: link.shortCode}">Link Title</h2>
-        <div class="subtitle" th:text="${shortUrl}">http://localhost:8090/abc123</div>
+    <div th:replace="~{fragments/sidebar :: sidebar('links')}"></div>
+    <div class="sidebar-content">
+        <div class="container">
+            <h2 th:text="${link.title ?: link.shortCode}">Link Title</h2>
+            <div class="subtitle">
+                <a th:href="${shortUrl}" th:text="${shortUrl}" target="_blank">http://localhost:8090/abc123</a>
+            </div>
 
-        <div class="stat-cards">
-            <div class="stat-card">
-                <div class="stat-number" th:text="${stats.totalClicks()}">0</div>
-                <div class="stat-label">Total Clicks</div>
+            <!-- Date Range Presets -->
+            <div class="preset-bar">
+                <a class="preset-btn" th:classappend="${activePreset == 'today'} ? 'active' : ''"
+                   th:href="@{/app/links/{id}/stats(id=${link.id}, preset='today')}">Today</a>
+                <a class="preset-btn" th:classappend="${activePreset == '7d'} ? 'active' : ''"
+                   th:href="@{/app/links/{id}/stats(id=${link.id}, preset='7d')}">7 Days</a>
+                <a class="preset-btn" th:classappend="${activePreset == '30d'} ? 'active' : ''"
+                   th:href="@{/app/links/{id}/stats(id=${link.id}, preset='30d')}">30 Days</a>
+                <a class="preset-btn" th:classappend="${activePreset == 'all'} ? 'active' : ''"
+                   th:href="@{/app/links/{id}/stats(id=${link.id}, preset='all')}">All Time</a>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" th:text="${stats.uniqueClicks()}">0</div>
-                <div class="stat-label">Unique Clicks</div>
+
+            <!-- Stat Cards -->
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${stats.totalClicks()}">0</div>
+                    <div class="stat-label">Total Clicks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" th:text="${stats.uniqueClicks()}">0</div>
+                    <div class="stat-label">Unique Clicks</div>
+                </div>
             </div>
+
+            <!-- Chart -->
+            <div class="chart-card">
+                <div class="chart-title">Clicks Over Time</div>
+                <div th:if="${stats.clicksByDate().isEmpty()}" class="empty-chart">
+                    <p>No click data for the selected period.</p>
+                </div>
+                <canvas th:unless="${stats.clicksByDate().isEmpty()}" id="clicksChart" height="100"></canvas>
+            </div>
+
+            <a class="back-link" th:href="@{/app/links/{id}(id=${link.id})}">&larr; Back to Link Detail</a>
         </div>
-
-        <p>Active Preset: <span th:text="${activePreset}">30d</span></p>
-        <p>Clicks by date data: <span th:text="${stats.clicksByDate()}">[]</span></p>
-
-        <a class="back-link" th:href="@{/app/links/{id}(id=${link.id})}">&larr; Back to Link Detail</a>
     </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var clicksByDate = /*[[${stats.clicksByDate()}]]*/ [];
+        if (clicksByDate.length > 0) {
+            var labels = clicksByDate.map(function(d) { return d.date; });
+            var data = clicksByDate.map(function(d) { return d.clicks; });
+            var ctx = document.getElementById('clicksChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Clicks',
+                        data: data,
+                        borderColor: '#4285F4',
+                        backgroundColor: 'rgba(66, 133, 244, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#4285F4',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        }
+                    }
+                }
+            });
+        }
+        /*]]>*/
+    </script>
 </body>
 </html>
