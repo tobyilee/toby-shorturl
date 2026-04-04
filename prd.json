@@ -1,0 +1,114 @@
+{
+  "project": "TobyShortUrl",
+  "branchName": "ralph/stats-page-and-sidebar",
+  "description": "링크별 통계 페이지(Chart.js)와 글로벌 좌측 사이드바 네비��이션 추가",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "통계 뷰 컨트롤러 엔드포인트 생성",
+      "description": "개발자로서, StatsV1 데이터를 조회하고 Thymeleaf 통계 템플릿을 렌더링하는 서버사이드 컨트롤러 엔드포인트가 필요하다.",
+      "acceptanceCriteria": [
+        "DashboardViewController 또는 새 컨트롤러에 GET /app/links/{id}/stats 엔드포인트 추가",
+        "선택적 쿼리 파라미터 from, to (LocalDate) 수용, 기본값은 최근 30일",
+        "링크 소유권 검증 (현재 사용자가 링크 ���유자여야 함)",
+        "AnalyticsService.getStatsV1(linkId, from, to) 호출 후 데이터를 템플릿 모델에 전달",
+        "링크 엔티티, 통계 데이터, 활성 날짜 프리셋 이름을 모델에 전달",
+        "링크를 찾을 수 없거나 소유자가 아닌 경우 404 반환",
+        "빈 stats.html 템플릿 파일 생성 (최소한 Thymeleaf 네임스페이스와 모델 변수 출력)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "DashboardViewController에 /app/links/{id}/stats 엔드포인트 추가. preset 파라미��로 날짜 범위 계산. stats.html 기본 템플릿 생성."
+    },
+    {
+      "id": "US-002",
+      "title": "사이드바 Thymeleaf 프래그먼트 생성 및 대시보드 적용",
+      "description": "개발자로서, 글로벌 사이드바 네비게이션의 공유 Thymeleaf 프래그���트를 만들고 대시보드 페이지에 먼저 적용하고 싶다.",
+      "acceptanceCriteria": [
+        "templates/fragments/sidebar.html 생성 — th:fragment='sidebar(activePage)' 파라미터 사용",
+        "사이드바에 네���게이션 항목 포함: Dashboard (/app/dashboard), My Links (대시보드와 동일 링크), Settings (비활성 플레이스홀더)",
+        "사이드바 상단에 앱 로고/이름 'TobyShortUrl', 하단에 사용자 이름 + 로그아웃 버튼",
+        "activePage 파라미터로 현재 페이지 네비게이션 항목 강조",
+        "사이드바 너비 ~240px, 고정 위치, 전체 높이, 흰색 배경에 우측 테두리",
+        "dashboard.html에 사이드바 프래그먼트 적용 — 기존 상단 nav 제거, 메인 컨텐츠가 우측으로 이동",
+        "화면 ���비 768px 미만에서 사이드바 숨김",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "fragments/sidebar.html 생성. th:fragment='sidebar(activePage)' + sidebarStyles 프래그먼트. dashboard.html에서 상단 nav 제거하고 사이드바 적용."
+    },
+    {
+      "id": "US-003",
+      "title": "나머지 인증 페이지에 사이드바 적용",
+      "description": "사용자로서, 링크 생성, 링크 상세 페이지에서도 동일한 사이드바 네비게이션을 사용하고 싶다.",
+      "acceptanceCriteria": [
+        "link-create.html에 사이드바 프래그먼트 적용 — 기존 상단 nav 제거",
+        "link-detail.html에 사이드바 프래그먼트 적용 — 기존 상단 nav 제거",
+        "각 페이지에서 activePage 파라미터 올바르게 설정",
+        "랜딩 페이지(home.html)와 로그인 페이지(login.html)는 변경하지 않음",
+        "사이드바에 사용자 이름이 올바르게 표시됨 (각 페이지 컨트롤러에서 userName 모델 전달 확인)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "link-create.html, link-detail.html에 사이드바 적용. DashboardViewController에서 createForm, linkDetail에 userName 모델 속성 추가."
+    },
+    {
+      "id": "US-004",
+      "title": "통계 페이지 UI — 통계 카드와 Chart.js 라인 차트",
+      "description": "사용자로서, 특정 링크의 클릭 통계를 전용 페이지에서 차트와 함께 확인하고 싶다.",
+      "acceptanceCriteria": [
+        "stats.html에 사이드바 프래그먼트 적용",
+        "페이지 상단에 링크 제목과 단축 URL 표시",
+        "총 클릭수, 고유 클릭수를 큰 숫자 카드 2개로 나란히 표시",
+        "Chart.js CDN (https://cdn.jsdelivr.net/npm/chart.js) 로드",
+        "th:inline='javascript'로 clicksByDate 데이터를 JSON으로 주입",
+        "일별 클릭수 라인 차트 렌더링 — X축: 날짜, Y축: 클릭수",
+        "클릭 데이터가 없을 때 적절한 빈 상태 메시지 표시",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "stats.html에 Chart.js CDN, th:inline='javascript'로 clicksByDate 주입, 라인 차트 렌더링. 빈 데이터 시 empty-chart 메시지 표시."
+    },
+    {
+      "id": "US-005",
+      "title": "날짜 범위 프리셋 필터 추가",
+      "description": "사용자로서, 프리셋 날짜 범위로 통계를 필터링하여 최근 또는 과거 성과에 집중하고 싶다.",
+      "acceptanceCriteria": [
+        "���트 위에 4개 프리셋 버튼 표시: 오늘, 7일, 30일, 전체",
+        "페이지 로드 시 기본 선택은 30일",
+        "프리셋 클릭 시 ?preset=today|7d|30d|all 쿼리 파라미터로 페이지 리로드",
+        "컨트롤러에서 preset 파라미터를 from/to LocalDate로 변환",
+        "'전체'는 링크의 createdAt 날짜를 from으로 사용",
+        "선택된 프리셋 버튼이 시각적으로 강조 (활성 상태 — 파란색 배경)",
+        "통계 숫자(총 클릭수, 고유 클릭수)와 차트가 선택한 범위에 맞게 업데이트",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "stats.html에 preset-bar 4개 버튼(Today/7D/30D/All Time) 구현. 컨트롤러의 preset 변환 로직은 US-001에서 이미 구현됨."
+    },
+    {
+      "id": "US-006",
+      "title": "링크 상세 페이지에 '통계 보기' 링크 추가",
+      "description": "사용자로서, 링크 상세 페이지에서 바�� 통계 페이지로 이동할 수 있기를 원한다.",
+      "acceptanceCriteria": [
+        "link-detail.html에 '통계 보기' 버튼/링크 추가",
+        "클릭 ��� /app/links/{id}/stats 페이지로 이동",
+        "버튼 스타일이 기존 디자인과 일관성 유지 (#4285F4 파란색)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "link-detail.html에 View Stats 버튼 추가. #4285F4 파란색 배경, /app/links/{id}/stats로 이동."
+    }
+  ]
+}

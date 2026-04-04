@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TobyShortUrl - Link Detail</title>
+    <style th:replace="~{fragments/sidebar :: sidebarStyles}"></style>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
@@ -30,39 +31,48 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 th:text="${link.title ?: link.shortCode}">Link Title</h2>
-        <div class="card">
-            <div class="field">
-                <div class="field-label">Original URL</div>
-                <div class="field-value"><a th:href="${link.originalUrl}" th:text="${link.originalUrl}" target="_blank">https://example.com</a></div>
-            </div>
-            <div class="field">
-                <div class="field-label">Short URL</div>
-                <div class="field-value">
-                    <div class="copy-row">
-                        <a th:href="${shortUrl}" th:text="${shortUrl}" target="_blank">http://localhost:8080/abc123</a>
-                        <button class="copy-btn" id="copyBtn" th:data-url="${shortUrl}" onclick="copyShortUrl(this)">
-                            <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                            </svg>
-                            <span class="copied-text" id="copiedText" style="display:none;">Copied!</span>
-                        </button>
+    <div th:replace="~{fragments/sidebar :: sidebar('links')}"></div>
+    <div class="sidebar-content">
+        <div class="container">
+            <h2 th:text="${link.title ?: link.shortCode}">Link Title</h2>
+            <div class="card">
+                <div class="field">
+                    <div class="field-label">Original URL</div>
+                    <div class="field-value"><a th:href="${link.originalUrl}" th:text="${link.originalUrl}" target="_blank">https://example.com</a></div>
+                </div>
+                <div class="field">
+                    <div class="field-label">Short URL</div>
+                    <div class="field-value">
+                        <div class="copy-row">
+                            <a th:href="${shortUrl}" th:text="${shortUrl}" target="_blank">http://localhost:8090/abc123</a>
+                            <button class="copy-btn" id="copyBtn" th:data-url="${shortUrl}" onclick="copyShortUrl(this)">
+                                <svg id="copyIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                                <span class="copied-text" id="copiedText" style="display:none;">Copied!</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="field">
-                <div class="stat-box">
-                    <div class="stat-number" th:text="${link.clickCount}">0</div>
-                    <div class="stat-label">Total Clicks</div>
+                <div class="field">
+                    <div class="stat-box">
+                        <div class="stat-number" th:text="${link.clickCount}">0</div>
+                        <div class="stat-label">Total Clicks</div>
+                    </div>
+                </div>
+                <div class="qr-section">
+                    <img th:src="@{/api/links/{id}/qr(id=${link.id})}" alt="QR Code" width="200" height="200">
                 </div>
             </div>
-            <div class="qr-section">
-                <img th:src="@{/api/links/{id}/qr(id=${link.id})}" alt="QR Code" width="200" height="200">
+            <div style="display: flex; gap: 16px; align-items: center;">
+                <a class="back-link" th:href="@{/app/dashboard}">&larr; Back to Dashboard</a>
+                <a th:href="@{/app/links/{id}/stats(id=${link.id})}"
+                   style="display:inline-block; background:#4285F4; color:white; padding:8px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">
+                    View Stats
+                </a>
             </div>
         </div>
-        <a class="back-link" th:href="@{/app/dashboard}">&larr; Back to Dashboard</a>
     </div>
     <script>
     function copyShortUrl(btn) {

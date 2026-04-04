@@ -1,5 +1,6 @@
 package com.tobyshorturl.web.view;
 
+import com.tobyshorturl.analytics.service.AnalyticsService;
 import com.tobyshorturl.identity.domain.User;
 import com.tobyshorturl.identity.repository.UserRepository;
 import com.tobyshorturl.link.domain.Link;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,16 +19,22 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+
 @Controller
 @RequestMapping("/app")
 public class DashboardViewController {
 
     private final LinkService linkService;
     private final UserRepository userRepository;
+    private final AnalyticsService analyticsService;
 
-    public DashboardViewController(LinkService linkService, UserRepository userRepository) {
+    public DashboardViewController(LinkService linkService, UserRepository userRepository,
+                                   AnalyticsService analyticsService) {
         this.linkService = linkService;
         this.userRepository = userRepository;
+        this.analyticsService = analyticsService;
     }
 
     @GetMapping("/dashboard")
@@ -42,7 +50,8 @@ public class DashboardViewController {
     }
 
     @GetMapping("/links/new")
-    public String createForm() {
+    public String createForm(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        model.addAttribute("userName", principal.getAttribute("name"));
         return "link-create";
     }
 
@@ -65,7 +74,43 @@ public class DashboardViewController {
         String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
         model.addAttribute("link", link);
         model.addAttribute("shortUrl", baseUrl + "/" + link.getShortCode());
+        model.addAttribute("userName", principal.getAttribute("name"));
         return "link-detail";
+    }
+
+    @GetMapping("/links/{id}/stats")
+    public String linkStats(@PathVariable Long id,
+                            @RequestParam(required = false) String preset,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                            @AuthenticationPrincipal OAuth2User principal,
+                            Model model) {
+        Long userId = resolveUserId(principal);
+        Link link = linkService.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        String activePreset = (preset != null) ? preset : "30d";
+        LocalDate today = LocalDate.now();
+
+        if (from == null || to == null) {
+            to = today;
+            from = switch (activePreset) {
+                case "today" -> today;
+                case "7d" -> today.minusDays(6);
+                case "all" -> link.getCreatedAt().atZone(ZoneOffset.UTC).toLocalDate();
+                default -> today.minusDays(29);
+            };
+        }
+
+        AnalyticsService.StatsV1 stats = analyticsService.getStatsV1(link.getId(), from, to);
+
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        model.addAttribute("link", link);
+        model.addAttribute("shortUrl", baseUrl + "/" + link.getShortCode());
+        model.addAttribute("stats", stats);
+        model.addAttribute("activePreset", activePreset);
+        model.addAttribute("userName", principal.getAttribute("name"));
+        return "stats";
     }
 
     private Long resolveUserId(OAuth2User principal) {

@@ -46,8 +46,6 @@ Flyway migrations run automatically on startup.
 ### Environment Variables
 
 ```bash
-export GOOGLE_CLIENT_ID=your-google-client-id
-export GOOGLE_CLIENT_SECRET=your-google-client-secret
 export GITHUB_CLIENT_ID=your-github-client-id
 export GITHUB_CLIENT_SECRET=your-github-client-secret
 export IP_HASH_SECRET=your-secret-key
